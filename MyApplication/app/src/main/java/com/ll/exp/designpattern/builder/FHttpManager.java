@@ -2,6 +2,8 @@ package com.ll.exp.designpattern.builder;
 
 import android.util.Log;
 
+import com.ll.exp.designpattern.Base.FBaseActivity;
+
 import java.io.IOException;
 
 import okhttp3.Call;
@@ -41,7 +43,7 @@ public class FHttpManager
             {
                 @Override public void onFailure(Call call, IOException e)
                 {
-                    fHttpCallback.onFailure(STATUS_ERROR, null, e);
+                    sendFailCallback(fHttpCallback, STATUS_ERROR, null, e);
                     showRequestLog(call, null);
                     Log.e("liujc", "asyncExecute e: " + e.getMessage());
                 }
@@ -50,12 +52,12 @@ public class FHttpManager
                 {
                     if (null != response)
                     {
-                        fHttpCallback.onSuccess(response.toString());
+                        sendSuccessCallback(fHttpCallback, response.toString());
                         showRequestLog(call, response);
                     }
                     else
                     {
-                        fHttpCallback.onFailure(STATUS_ERROR, null, null);
+                        sendFailCallback(fHttpCallback, STATUS_ERROR, null, null);
                     }
                 }
             });
@@ -63,8 +65,50 @@ public class FHttpManager
         catch (Exception e)
         {
             e.printStackTrace();
-            fHttpCallback.onFailure(STATUS_ERROR, null, e);
+            sendFailCallback(fHttpCallback, STATUS_ERROR, null, e);
             Log.e("liujc", "asyncExecute e: " + e.getMessage());
+        }
+    }
+
+    public void sendFailCallback(final FHttpCallback fHttpCallback, final int status,
+                                 final String msg, final Exception e)
+    {
+        FBaseActivity.sUIHandler.post(new Runnable()
+        {
+            @Override public void run()
+            {
+                fHttpCallback.onFailure(status, msg, e);
+            }
+        });
+    }
+
+    public void sendSuccessCallback(final FHttpCallback fHttpCallback, final String response)
+    {
+        FBaseActivity.sUIHandler.post(new Runnable()
+        {
+            @Override public void run()
+            {
+                fHttpCallback.onSuccess(response);
+                //// TODO: 2016/4/19  onEmpty
+            }
+        });
+    }
+
+    public void cancelTag(Object tag)
+    {
+        for (Call call : mOkHttpClient.dispatcher().queuedCalls())
+        {
+            if (tag.equals(call.request().tag()))
+            {
+                call.cancel();
+            }
+        }
+        for (Call call : mOkHttpClient.dispatcher().runningCalls())
+        {
+            if (tag.equals(call.request().tag()))
+            {
+                call.cancel();
+            }
         }
     }
 
