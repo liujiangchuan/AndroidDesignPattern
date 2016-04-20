@@ -1,51 +1,77 @@
 package com.ll.exp.designpattern;
 
-import android.content.Context;
+import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.AbsoluteSizeSpan;
+import android.text.style.ForegroundColorSpan;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import com.ll.exp.designpattern.Base.FBaseActivity;
-import com.ll.exp.designpattern.builder.FHttpCallback;
-import com.ll.exp.designpattern.builder.FHttpManager;
-import com.ll.exp.designpattern.builder.GetOrderListRequest;
 
 import butterknife.Bind;
+import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class MainActivity extends FBaseActivity
+public class MainActivity extends Activity
 {
-    private static TextView sTextView;
-    private Context mContext;
-    @Bind(R.id.text) TextView mText;
+    String mString = "asd（asdfasd)sdf";
+    @Bind(R.id.text1) TextView mText;
 
-    @Override protected void setContentView(Bundle savedInstanceState)
+    @Override protected void onCreate(Bundle savedInstanceState)
     {
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
     }
 
-    @Override protected void init()
+    @OnClick(R.id.text1) public void onClick()
     {
-        sTextView = mText;
-        mContext = this;
-        reloadData();
+        changeText(mString, mText);
     }
 
-    @Override protected void reloadData()
+    private void changeText(String text, TextView textView)
     {
-
-    }
-
-    @OnClick(R.id.text) public void onClick()
-    {
-        GetOrderListRequest getOrderListRequest = new GetOrderListRequest.ParamsBuilder().build();
-        FHttpManager.getInstance().asyncExecute(getOrderListRequest, new FHttpCallback()
+        int en_left = text.indexOf("(");
+        int en_right = text.indexOf(")");
+        int ch_left = text.indexOf("（");
+        int ch_right = text.indexOf("）");
+        int left = -1;
+        int right = -1;
+        if (-1 != en_left)
         {
-            @Override public void onSuccess(String response)
+            left = en_left;
+        }
+        else
+        {
+            if (-1 != ch_left)
             {
-                super.onSuccess(response);
-                Toast.makeText(mContext, "aa", Toast.LENGTH_LONG).show();
+                left = ch_left;
             }
-        });
+        }
+        if (-1 != en_right)
+        {
+            right = en_right;
+        }
+        else
+        {
+            if (-1 != ch_right)
+            {
+                right = ch_right;
+            }
+        }
+        if (-1 != left && -1 != right && left < right)
+        {
+            Spannable span = new SpannableString(text);
+            span.setSpan(new ForegroundColorSpan(Color.MAGENTA), left, right + 1,
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            span.setSpan(new AbsoluteSizeSpan(20, true), left, right + 1,
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            textView.setText(span);
+        }
+        else
+        {
+            textView.setText(text);
+        }
     }
 }

@@ -2,18 +2,17 @@ package com.ll.exp.designpattern.builder;
 
 import android.text.TextUtils;
 
-import com.ll.exp.designpattern.builder.httpbuilder.FHttpGetBuilder;
-import com.ll.exp.designpattern.builder.httpbuilder.FHttpRequestBuilder;
-
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Created by User on 2016/4/15.
  */
-public class GetOrderListRequest extends FHttpRequest
+public class GetOrderListRequest
 {
-    private final String URL = "https://github.com/hongyangAndroid";
+    /**
+     * GetOrderListRequest getOrderListRequest = new GetOrderListRequest.ParamsBuilder().setP("p").build();
+     */
     private final String P = "p";
     private Map<String, String> mParams;
 
@@ -41,15 +40,5 @@ public class GetOrderListRequest extends FHttpRequest
         {
             return new GetOrderListRequest(this);
         }
-    }
-
-    @Override public String getUrl()
-    {
-        return URL;
-    }
-
-    @Override public FHttpRequestBuilder getRequestBuilder()
-    {
-        return new FHttpGetBuilder(getTag(), URL, mParams);
     }
 }
